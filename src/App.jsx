@@ -3,13 +3,28 @@ import { useState } from "react";
 import { nanoid } from "nanoid";
 
 /**
- * Challenge: Update the `hold` function to flip
- * the `isHeld` property on the object in the array
- * that was clicked, based on the `id` prop passed
- * into the function.
+ * Critical thinking time!
  *
- * Hint: as usual, there's more than one way to
- * accomplish this.
+ * We want to indicate to the user that the game is over
+ * if (1) all the dice are held, and (2) all the dice have
+ * the same value.
+ *
+ * How might we do this? Some questions to consider:
+ *
+ * 1. Do we need to save a `gameWon` value in state? If so, why?
+ *    If not, why not?
+ *
+ *
+ *
+ * 2. Do we need to create a side effect to synchronize the `gameWon`
+ *    value (whether it's in state or not) with the current state of
+ *    the dice?
+ *
+ *
+ * Conclusion:
+ *
+ *
+ *
  */
 
 export default function App() {
@@ -32,7 +47,13 @@ export default function App() {
   const [dice, setDice] = useState(generateAllNewDice());
 
   function rollDice() {
-    setDice(generateAllNewDice());
+    setDice((prevDice) =>
+      prevDice.map((dice) => {
+        return dice.isHeld
+          ? dice
+          : { ...dice, value: Math.ceil(Math.random() * 6) };
+      })
+    );
   }
 
   const diceElements = dice.map((dieObj) => (
@@ -46,6 +67,11 @@ export default function App() {
 
   return (
     <main>
+      <h1 className="title">Tenzies</h1>
+      <p className="instructions">
+        Roll until all dice are the same. Click each die to freeze it at its
+        current value between rolls.
+      </p>
       <div className="dice-container">{diceElements}</div>
 
       <button className="roll-dice" onClick={rollDice}>
