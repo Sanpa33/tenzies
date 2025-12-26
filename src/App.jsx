@@ -1,12 +1,3 @@
-    /**
-     * Challenge: Update the array of numbers in state to be
-     * an array of objects instead. Each object should look like:
-     * { value: <random number>, isHeld: false }
-     * 
-     * Making this change will break parts of our code, so make
-     * sure to update things so we're back to a working state
-     */
-
 import Die from './Die.jsx'
 import {useState} from 'react'
 
@@ -17,9 +8,10 @@ export default function App() {
 
         return new Array(10)
             .fill(0)
-            .map(() => Math.floor(Math.random() * 6))
+            .map(() => ({value: Math.ceil(Math.random() * 6), isHeld: false}))
         
     }
+
 
     const [dice, setDice] = useState(generateAllNewDice())
 
@@ -27,12 +19,14 @@ export default function App() {
         setDice(generateAllNewDice())
     }
 
+    console.log(dice)
 
-    const diceElements = dice.map((value, index) => (
-        <Die key={index} value={value} />
+
+    const diceElements = dice.map((diceObj, index) => (
+        <Die key={index} value={diceObj.value} />
     ))
 
-    
+
 
 
     return (
