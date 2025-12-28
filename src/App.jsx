@@ -1,25 +1,9 @@
 import Die from "./Die.jsx";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
-
-/**
- * Challenge:
- * Log "Game won!" to the console only if the 2 winning
- * conditions are met.
- *
- * 1. all the dice are being held, and
- * 2. all the dice have the same value
- *
- * For now, no need to even save a variable!
- */
+import Confetti from "react-confetti";
 
 export default function App() {
-  const [dice, setDice] = useState(generateAllNewDice());
-
-  const gameWon =
-    dice.every((die) => die.isHeld) &&
-    dice.every((die) => die.value === dice[0].value);
-
   function generateAllNewDice() {
     return new Array(10).fill(0).map(() => ({
       value: Math.ceil(Math.random() * 6),
@@ -27,6 +11,13 @@ export default function App() {
       id: nanoid(),
     }));
   }
+
+  const [dice, setDice] = useState(() => generateAllNewDice());
+  const buttonRef = useRef(null);
+
+  const gameWon =
+    dice.every((die) => die.isHeld) &&
+    dice.every((die) => die.value === dice[0].value);
 
   function hold(id) {
     setDice((prevDice) =>
@@ -36,14 +27,22 @@ export default function App() {
     );
   }
 
+  useEffect(() => {
+    if (gameWon) {
+      buttonRef.current.focus();
+    }
+  }, [gameWon]);
+
   function rollDice() {
-    setDice((prevDice) =>
-      prevDice.map((dice) => {
-        return dice.isHeld
-          ? dice
-          : { ...dice, value: Math.ceil(Math.random() * 6) };
-      })
-    );
+    if (!gameWon) {
+      setDice((oldDice) =>
+        oldDice.map((die) =>
+          die.isHeld ? die : { ...die, value: Math.ceil(Math.random() * 6) }
+        )
+      );
+    } else {
+      setDice(generateAllNewDice());
+    }
   }
 
   const diceElements = dice.map((dieObj) => (
@@ -57,15 +56,20 @@ export default function App() {
 
   return (
     <main>
+      {gameWon && <Confetti />}
+      <div aria-live="polite" className="sr-only">
+        {gameWon && (
+          <p>Congratulations! You won! Press "New Game" to start again.</p>
+        )}
+      </div>
       <h1 className="title">Tenzies</h1>
       <p className="instructions">
         Roll until all dice are the same. Click each die to freeze it at its
         current value between rolls.
       </p>
       <div className="dice-container">{diceElements}</div>
-
-      <button className="roll-dice" onClick={rollDice}>
-        {gameWon ? "New game" : "Roll"}
+      <button ref={buttonRef} className="roll-dice" onClick={rollDice}>
+        {gameWon ? "New Game" : "Roll"}
       </button>
     </main>
   );
